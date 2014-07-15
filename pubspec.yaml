@@ -1,0 +1,4 @@
+name: SimpleRest
+version: 0.0.01
+author: Pierre Reliquet
+description: A very simple REST API to handle the low level HttpRequest routing.
