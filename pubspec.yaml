@@ -1,4 +1,6 @@
-name: SimpleRest
-version: 0.0.01
+name: Restart
+version: 0.0.1
 author: Pierre Reliquet
 description: A very simple REST API to handle the low level HttpRequest routing.
+homepage: https://github.com/PierreReliquet/restart
+documentation: https://github.com/PierreReliquet/restart
