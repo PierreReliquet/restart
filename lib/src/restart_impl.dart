@@ -1,7 +1,10 @@
 part of restart;
 
 class Restart {
+
+  /// The Map which stores the many endpoints used by the application.
   static final Map<String, List<Endpoint>> _endpoints = {};
+  /// The singleton private instance which can be only accessed from within the class
   static final Restart _instance = new Restart._internal();
 
   // Internal constructor to provide the singleton
@@ -46,7 +49,7 @@ class Restart {
   Future<HttpResponse> _handle(HttpRequest req, List<Endpoint> list) {
     var endpoints = list.where((e) => e.matches(req.uri.toString()));
     if (endpoints.isEmpty || endpoints.length > 1) {
-      print("${endpoints.length} handler(s) found for ${req.method} - ${req.uri}");
+      print("${endpoints.length} handler(s) found for${req.method} - ${req.uri}");
       return badRequest(req);
     } else {
       var endpoint = endpoints.first;
