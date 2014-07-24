@@ -1,16 +1,11 @@
 part of restart;
 
 class Restart {
-  static final Map<HttpMethod, List<Endpoint>> _endpoints = {};
+  static final Map<String, List<Endpoint>> _endpoints = {};
   static final Restart _instance = new Restart._internal();
 
   // Internal constructor to provide the singleton
-  Restart._internal() {
-    _endpoints[HttpMethod.PUT] = [];
-    _endpoints[HttpMethod.GET] = [];
-    _endpoints[HttpMethod.POST] = [];
-    _endpoints[HttpMethod.DELETE] = [];
-  }
+  Restart._internal() {}
 
   factory Restart() {
     return _instance;
@@ -20,7 +15,7 @@ class Restart {
    * Returns a new copy of the endpoints.
    * The map can be modified without altering the Restart registered endpoints.
    */
-  Map<HttpMethod, List<Endpoint>> get endpoints => new Map.from(_endpoints);
+  Map<String, List<Endpoint>> get endpoints => new Map.from(_endpoints);
 
   void registerEndpoints(Object obj) {
     InstanceMirror instance = reflect(obj);
@@ -30,39 +25,46 @@ class Restart {
       methodMirror.metadata.forEach((InstanceMirror im) {
         if (im.reflectee is HttpEndpoint) {
           var uri = (im.reflectee as HttpEndpoint).uri;
-          if(im.reflectee is Post) {
-            _endpoints[HttpMethod.POST].add(new Endpoint(uri, methodMirror, instance));
-          } else if (im.reflectee is Put) {
-            _endpoints[HttpMethod.PUT].add(new Endpoint(uri, methodMirror, instance));
-          } else if (im.reflectee is Get) {
-            _endpoints[HttpMethod.GET].add(new Endpoint(uri, methodMirror, instance));
-          } else if (im.reflectee is Delete) {
-            _endpoints[HttpMethod.DELETE].add(new Endpoint(uri, methodMirror, instance));
+          // Let's get it to uppercase
+          var method = im.reflectee.runtimeType.toString().toUpperCase();
+          // Create the local endpoint
+          var endpoint = new Endpoint(uri, methodMirror, instance);
+          // Finally register it
+          if(_endpoints.containsKey(method)) {
+            _endpoints[method].add(endpoint);
+          } else {
+            _endpoints.putIfAbsent(method, () => [endpoint]);
           }
         }
       });
     });
   }
 
+  /**
+   * Internal method for handling the [HttpRequest] received.
+   */
   Future<HttpResponse> _handle(HttpRequest req, List<Endpoint> list) {
     var endpoints = list.where((e) => e.matches(req.uri.toString()));
     if (endpoints.isEmpty || endpoints.length > 1) {
-      print("no handler or more than one handler found for " + req.uri.toString());
+      print("${endpoints.length} handler(s) found for ${req.method} - ${req.uri}");
       return badRequest(req);
     } else {
       var endpoint = endpoints.first;
-      var match = endpoint.regexp.firstMatch(req.uri.toString());
-      if (match.groupCount != endpoint.params.length) {
+      Match match = endpoint.regexp.firstMatch(req.uri.toString());
+      var urlParams = match.groupCount;
+      if (urlParams != endpoint.params.length) {
+        // Here we don't have the right number of parameters
         return badRequest(req);
       } else {
-        Map params = {};
-        int i = 1;
-        endpoint.params.forEach((String value) {
-          params[value] = match.group(i);
-          i += 1;
-        });
+        // Here we generate the parameters which are for now positional
+        var invokeParams = [req];
+        for (var i = 1; i <= urlParams; i++) {
+          invokeParams.add(match.group(i));
+        }
 
-        var response = endpoint.instance.invoke(endpoint.mirror.simpleName, [req, params]).reflectee;
+        // Finally let's call the method
+        var response = endpoint.invoke(invokeParams);
+
         if (response is HttpResponse) { // if we just have a HttpResponse let's wrap it in a future
           response = new Future(() => response);
         }
@@ -79,7 +81,7 @@ class Restart {
    *
    * If the [port] is not provided the default value has been set to 9000.
    */
-  void listen([String ip = "0.0.0.0", int port = 9000]) {
+  void listen({String ip: "0.0.0.0", int port: 9000}) {
     // Let's bind the server to start listening
     HttpServer.bind(ip, port).then((HttpServer server) {
       server.listen((HttpRequest req) {

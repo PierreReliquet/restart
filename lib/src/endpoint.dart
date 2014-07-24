@@ -5,7 +5,7 @@ part of restart;
  */
 class Endpoint {
   static final RegExp _paramMatcher = new RegExp(r"{[a-zA-Z0-9]+}");
-  static final String _regexParam = "(.*)";
+  static final String _regexParam = "(.+)";
   RegExp regexp;
   List<String> params;
   MethodMirror mirror;
@@ -30,5 +30,7 @@ class Endpoint {
    }
 
   bool matches(String uri) => regexp.hasMatch(uri);
+
+  invoke(params) => this.instance.invoke(this.mirror.simpleName, params).reflectee;
 
 }
