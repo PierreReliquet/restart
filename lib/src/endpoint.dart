@@ -29,4 +29,6 @@ class Endpoint {
      this.params = params;
    }
 
+  bool matches(String uri) => regexp.hasMatch(uri);
+
 }

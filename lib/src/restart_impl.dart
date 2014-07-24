@@ -16,10 +16,15 @@ class Restart {
     return _instance;
   }
 
-  void registerEndpoints(Type type) {
+  /**
+   * Returns a new copy of the endpoints.
+   * The map can be modified without altering the Restart registered endpoints.
+   */
+  Map<HttpMethod, List<Endpoint>> get endpoints => new Map.from(_endpoints);
 
-    ClassMirror clazz = reflectClass(type);
-    InstanceMirror instance = clazz.newInstance(new Symbol(""), []);
+  void registerEndpoints(Object obj) {
+    InstanceMirror instance = reflect(obj);
+    ClassMirror clazz = instance.type;
 
     clazz.instanceMembers.forEach((symbol, MethodMirror methodMirror) {
       methodMirror.metadata.forEach((InstanceMirror im) {
@@ -40,7 +45,7 @@ class Restart {
   }
 
   Future<HttpResponse> _handle(HttpRequest req, List<Endpoint> list) {
-    var endpoints = list.where((Endpoint e) => e.regexp.hasMatch(req.uri.toString()));
+    var endpoints = list.where((e) => e.matches(req.uri.toString()));
     if (endpoints.isEmpty || endpoints.length > 1) {
       print("no handler or more than one handler found for " + req.uri.toString());
       return badRequest(req);
