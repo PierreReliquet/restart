@@ -1,6 +1,6 @@
 ## Restart
 
-[![Build Status](https://drone.io/github.com/PierreReliquet/restart/status.png)](https://drone.io/github.com/PierreReliquet/restart/latest)
+[ ![Build Status](https://drone.io/github.com/PierreReliquet/restart/status.png) ](https://drone.io/github.com/PierreReliquet/restart/latest)
 
 Restart is an implementation of a REST API for Dart.
 
