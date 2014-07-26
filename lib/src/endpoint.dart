@@ -15,18 +15,15 @@ class Endpoint {
   InstanceMirror instance;
 
   Endpoint(String rawUri, this.mirror, this.instance) {
-    Type returnType = this.mirror.returnType.reflectedType;
-    //TODO get that String comparison out of the way
-    if (!(returnType.toString() == "HttpResponse" || returnType.toString() == "Future<HttpResponse>" || returnType.toString() == "dynamic")) {
-      throw new ReturnTypeError(returnType, HttpResponse);
-    }
+    _validateReturnType();
+    _validateFirstParameter();
+    rawUri = _initParamsAndGetFormattedURI(rawUri);
 
-    // Here we handle the case dynamic just in case people would rather write var instead of HttpRequest
-    var reqType = this.mirror.parameters.first.type.reflectedType;
-    if (!(reqType.toString() == 'HttpRequest' || reqType.toString() == 'dynamic')) {
-      throw new BadParameterError(reqType, HttpRequest);
-    }
+    // The generated regexp needs to be strictly what has been provided by the developer.
+    this.regexp = new RegExp("^" + rawUri + r"$");
+   }
 
+  String _initParamsAndGetFormattedURI(String rawUri) {
     var params = [];
     var param = _paramMatcher.stringMatch(rawUri);
     while(param != null) {
@@ -37,11 +34,25 @@ class Endpoint {
       // Taking next
       param = _paramMatcher.stringMatch(rawUri);
     }
-
-    // The generated regexp needs to be strictly what has been provided by the developer.
-    this.regexp = new RegExp("^" + rawUri + r"$");
     this.params = params;
-   }
+    return rawUri;
+  }
+
+  void _validateFirstParameter() {
+    // Here we handle the case dynamic just in case people would rather write var instead of HttpRequest
+    var reqType = this.mirror.parameters.first.type.reflectedType;
+    if (!(reqType.toString() == 'HttpRequest' || reqType.toString() == 'dynamic')) {
+      throw new BadParameterError(reqType, HttpRequest);
+    }
+  }
+
+  void _validateReturnType() {
+    Type returnType = this.mirror.returnType.reflectedType;
+      //TODO get that String comparison out of the way
+      if (!(returnType.toString() == "HttpResponse" || returnType.toString() == "Future<HttpResponse>" || returnType.toString() == "dynamic")) {
+        throw new ReturnTypeError(returnType, HttpResponse);
+      }
+  }
 
   bool matches(String uri) => regexp.hasMatch(uri);
 
