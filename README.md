@@ -41,10 +41,10 @@ anything(HttpRequest req, String bar, String id) {...}
 It is now also possible to add support for non supported HTTP method with the following code : 
 ```Dart
 /// Adds the support for the PATCH method
-class Patch implements HttpEndpoint {
-  final String uri;
-  const Patch(this.uri);
+class Patch extends HttpEndpoint{
+  const Patch(String uri) : super(uri);
 }
+
 ```
 
 And this can be then be used : 
