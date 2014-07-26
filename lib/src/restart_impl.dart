@@ -3,7 +3,8 @@ part of restart;
 class Restart {
 
   /// The Map which stores the many endpoints used by the application.
-  static final Map<String, List<Endpoint>> _endpoints = {};
+  static final Map<String, Set<Endpoint>> _endpoints = {};
+
   /// The singleton private instance which can be only accessed from within the class
   static final Restart _instance = new Restart._internal();
 
@@ -14,29 +15,33 @@ class Restart {
     return _instance;
   }
 
+  static Restart get restart => _instance;
+
   /**
    * Returns a new copy of the endpoints.
    * The map can be modified without altering the Restart registered endpoints.
    */
-  Map<String, List<Endpoint>> get endpoints => new Map.from(_endpoints);
+  Map<String, Set<Endpoint>> get endpoints => new Map.from(_endpoints);
 
   void registerEndpoints(Object obj) {
     InstanceMirror instance = reflect(obj);
     ClassMirror clazz = instance.type;
 
-    clazz.instanceMembers.forEach((symbol, MethodMirror methodMirror) {
-      methodMirror.metadata.forEach((InstanceMirror im) {
-        if (im.reflectee is HttpEndpoint) {
-          var uri = (im.reflectee as HttpEndpoint).uri;
+    clazz.instanceMembers.forEach((symbol, methodMirror) {
+      methodMirror.metadata.forEach((instanceMirror) {
+        if (instanceMirror.reflectee is HttpEndpoint) {
+          var uri = (instanceMirror.reflectee as HttpEndpoint).uri;
           // Let's get it to uppercase
-          var method = im.reflectee.runtimeType.toString().toUpperCase();
+          var method = instanceMirror.reflectee.runtimeType.toString().toUpperCase();
           // Create the local endpoint
           var endpoint = new Endpoint(uri, methodMirror, instance);
           // Finally register it
           if(_endpoints.containsKey(method)) {
-            _endpoints[method].add(endpoint);
+            if (!_endpoints[method].add(endpoint)) {
+              throw new DuplicatedURIHandler(uri);
+            }
           } else {
-            _endpoints.putIfAbsent(method, () => [endpoint]);
+            _endpoints.putIfAbsent(method, () => new Set()..add(endpoint));
           }
         }
       });
@@ -46,10 +51,10 @@ class Restart {
   /**
    * Internal method for handling the [HttpRequest] received.
    */
-  Future<HttpResponse> _handle(HttpRequest req, List<Endpoint> list) {
-    var endpoints = list.where((e) => e.matches(req.uri.toString()));
-    if (endpoints.isEmpty || endpoints.length > 1) {
-      print("${endpoints.length} handler(s) found for${req.method} - ${req.uri}");
+  Future<HttpResponse> _handle(HttpRequest req, Set<Endpoint> set) {
+    var endpoints = set.where((e) => e.matches(req.uri.toString()));
+    if (endpoints.isEmpty) {
+      print("No handler for: ${req.method} ${req.uri}");
       return badRequest(req);
     } else {
       var endpoint = endpoints.first;

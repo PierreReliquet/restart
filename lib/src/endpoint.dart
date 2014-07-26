@@ -54,6 +54,12 @@ class Endpoint {
       }
   }
 
+  // TODO find a better way because this is not right two endpoints are equal if and only if
+  // they have same URI
+  // they have same HttpMethod
+  bool operator==(e)=> (e is Endpoint && (e as Endpoint).regexp.pattern == regexp.pattern);
+  int get hashCode => regexp.pattern.hashCode;
+
   bool matches(String uri) => regexp.hasMatch(uri);
 
   /**
