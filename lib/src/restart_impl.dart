@@ -15,8 +15,6 @@ class Restart {
     return _instance;
   }
 
-  static Restart get restart => _instance;
-
   /**
    * Returns a new copy of the endpoints.
    * The map can be modified without altering the Restart registered endpoints.
@@ -35,8 +33,10 @@ class Restart {
           var method = instanceMirror.reflectee.runtimeType.toString().toUpperCase();
           // Create the local endpoint
           var endpoint = new Endpoint(uri, methodMirror, instance);
+
           // Finally register it
           if(_endpoints.containsKey(method)) {
+            // If the endpoint already exists for the given HttpMethod let's throw an exception
             if (!_endpoints[method].add(endpoint)) {
               throw new DuplicatedURIHandler(uri);
             }
