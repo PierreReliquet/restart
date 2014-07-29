@@ -5,6 +5,5 @@ description: Restart is an implementation of a REST API for Dart. The aim is to 
 homepage: https://github.com/PierreReliquet/restart
 environment:
   sdk: 1.5.3
-documentation: https://github.com/PierreReliquet/restart
 dev_dependencies:
   unittest: any
