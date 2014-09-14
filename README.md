@@ -22,7 +22,7 @@ class Endpoint {
 
 And as follow for the launch of the HTTP server:  
 ```Dart
-new SimpleRest()..registerEndpoints(new TodoEndpoint())..listen('0.0.0.0', 9000);
+new SimpleRest()..registerEndpoints(new Endpoint())..listen('0.0.0.0', 9000);
 ```
 
 *One might ask why an instantiated object is provided to the registerEndpoints method? This is a design point of view because the user might have to do some IoC and consequently would not want me to instantiate that Object for him.*
