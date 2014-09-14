@@ -4,6 +4,6 @@ author: Pierre Reliquet <pierre.reliquet@gmail.com>
 description: Restart is an implementation of a REST API for Dart. The aim is to provide a way of registering easily some endpoints by use of annotations which is similar to many Java API.
 homepage: https://github.com/PierreReliquet/restart
 environment:
-  sdk: 1.5.3
+  sdk: 1.6.0
 dev_dependencies:
   unittest: any
