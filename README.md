@@ -58,3 +58,12 @@ class Endpoints {
   HttpResponse anything(HttpRequest req) {...}
 }
 ```
+
+# Changelog
+## 0.0.2
+* Updating the SDK version to be compatible with the 1.6.0 project
+## 0.0.1
+Basic functionnalities: 
+* Common REST verbs: GET, POST, PUT, DELETE
+* Ability to extend the existing verbs
+* Ability to get immediately the parameters extracted positionally (c.f. previously)
