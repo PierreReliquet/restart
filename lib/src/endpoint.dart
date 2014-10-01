@@ -10,18 +10,31 @@ class Endpoint {
   // Here we specify that a parameter cannot be empty
   static final String _regexParam = "(.+)";
   RegExp regexp;
-  List<String> params;
+  List<String> params = [];
+  List<Symbol> paramsType = [];
   MethodMirror mirror;
   InstanceMirror instance;
 
   Endpoint(String rawUri, this.mirror, this.instance) {
     _validateReturnType();
     _validateFirstParameter();
+    _registerParameterTypes();
+
     rawUri = _initParamsAndGetFormattedURI(rawUri);
 
     // The generated regexp needs to be strictly what has been provided by the developer.
     this.regexp = new RegExp("^" + rawUri + r"$");
    }
+  
+  /**
+   * Registers the type of each parameter to be able to transform them
+   * from String to the right type.
+   */
+  void _registerParameterTypes() {
+    this.mirror.parameters.forEach((ParameterMirror pm) {
+      paramsType.add(pm.type.simpleName);
+    });
+  }
 
   String _initParamsAndGetFormattedURI(String rawUri) {
     var params = [];
@@ -69,6 +82,27 @@ class Endpoint {
    * @return the result of the function execution which is either a HttpResponse or a
    * Future<HttpResponse>
    */
-  invoke(List params) => this.instance.invoke(this.mirror.simpleName, params).reflectee;
+  invoke(List invokationParams) {
+    if (!(invokationParams[0] is HttpRequest)) {
+      // First param should be an HttpRequest
+      throw new Error();
+    }
+    var i = 0;
+    var transformedParams = [];
+    
+    // Let's transform the parameters if required
+    invokationParams.forEach((s) {
+      if(s is String) {
+        var transformer = new Restart().getTransformer(paramsType[i]);
+        if (transformer != null) {
+          s = transformer(s);
+        }
+      }
+      transformedParams.add(s);
+      i++;
+    });
+    
+    this.instance.invoke(this.mirror.simpleName, transformedParams).reflectee;
+  }
 
 }

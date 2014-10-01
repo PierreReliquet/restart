@@ -9,3 +9,4 @@ part 'src/restart_impl.dart';
 part 'src/endpoint.dart';
 part 'src/responses.dart';
 part 'src/errors.dart';
+part 'src/transformers.dart';

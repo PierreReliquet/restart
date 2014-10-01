@@ -4,12 +4,20 @@ class Restart {
 
   /// The Map which stores the many endpoints used by the application.
   static final Map<String, Set<Endpoint>> _endpoints = {};
+  
+  static final Map<Symbol, Transformer> _transformers = {};
 
   /// The singleton private instance which can be only accessed from within the class
   static final Restart _instance = new Restart._internal();
 
   // Internal constructor to provide the singleton
-  Restart._internal() {}
+  Restart._internal() {
+    registerTransformer(#int, NativeTransformers.intTransformer);
+    registerTransformer(#num, NativeTransformers.numTransformer);
+    registerTransformer(#bool, NativeTransformers.boolTransformer);
+    registerTransformer(#DateTime, NativeTransformers.dateTimeTransformer);
+    registerTransformer(#String, NativeTransformers.stringTransformer);
+  }
 
   factory Restart() {
     return _instance;
@@ -20,6 +28,17 @@ class Restart {
    * The map can be modified without altering the Restart registered endpoints.
    */
   Map<String, Set<Endpoint>> get endpoints => new Map.from(_endpoints);
+  
+  bool registerTransformer(Symbol s, Transformer f) {
+    if(_transformers.containsKey(s)) {
+      return false;
+    } else {
+      _transformers[s] = f;
+      return true;
+    }
+  }
+  
+  Transformer getTransformer(Symbol s) => _transformers[s];
 
   void registerEndpoints(Object obj) {
     InstanceMirror instance = reflect(obj);
