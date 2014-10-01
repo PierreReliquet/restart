@@ -2,6 +2,7 @@ import 'package:unittest/unittest.dart';
 import 'dart:mirrors';
 import 'package:restart/restart.dart';
 import 'dart:io';
+import 'mocks/MockHttpRequest.dart';
 
 class TestClass {
   HttpResponse testFn(HttpRequest req) {return null;}
@@ -14,13 +15,20 @@ class TestClass {
 
   correctFirstParameter(var req) {}
 
+  HttpResponse testingParameters(HttpRequest req, int id, String name, bool test) {
+    return req.response..write({
+      'id': id,
+      'name': name,
+      'test': test
+    });
+  }
 }
 
 
 void main() {
   InstanceMirror im = reflect(new TestClass());
 
-  var methodMirror = im.type.instanceMembers[new Symbol('testFn')];
+  var methodMirror = im.type.instanceMembers[#testFn];
   Endpoint endpoint = new Endpoint('/{foo}/api/{bar}', methodMirror, im);
 
   test('Testing the endpoint constructor', () {
@@ -31,7 +39,14 @@ void main() {
   });
 
   test('Testing the method invokation', () {
-    expect(endpoint.invoke([null]), null);
+    expect(endpoint.invoke([new MockHttpRequest()]), null);
+  });
+  
+  test('Invoking the method with parameters to validate the transformers', () {
+    var m = im.type.instanceMembers[#testingParameters];
+    Endpoint e = new Endpoint('/{id}/api/{name}/test/{test}', m, im);
+    MockHttpResponse result = e.invoke([new MockHttpRequest(), '2', 'pierre', 'true']);
+    expect(result.body, {'id': 2, 'name': 'pierre', 'test': true});
   });
 
   test('Testing the matches method', () {

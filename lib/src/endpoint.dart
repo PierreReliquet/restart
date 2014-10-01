@@ -102,7 +102,7 @@ class Endpoint {
       i++;
     });
     
-    this.instance.invoke(this.mirror.simpleName, transformedParams).reflectee;
+    return this.instance.invoke(this.mirror.simpleName, transformedParams).reflectee;
   }
 
 }
