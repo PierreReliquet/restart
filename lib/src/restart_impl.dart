@@ -178,7 +178,7 @@ class Restart {
   Future<HttpResponse> _wrapResponse(response) {
     // if we just have a HttpResponse let's wrap it in a future
     if (response is HttpResponse) { 
-      return new Future(() => response);
+      return toFuture(response);
     }
     return response;
   }

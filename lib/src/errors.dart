@@ -1,5 +1,9 @@
 part of restart;
 
+/**
+ * Indicates a mismatch between the return type of the method (in our case the endpoint) 
+ * and the expected one. 
+ */
 class ReturnTypeError extends Error {
   Type encounteredType;
   Type expectedType;
@@ -9,6 +13,9 @@ class ReturnTypeError extends Error {
   toString() => "Return type of the method should be $expectedType and was $encounteredType";
 }
 
+/**
+ * Indicates that a parameter does not have the expected type.
+ */
 class BadParameterError extends Error {
   Type encounteredType;
   Type expectedType;
@@ -18,6 +25,9 @@ class BadParameterError extends Error {
   toString() => "Parameter type of the method should be $expectedType and not $encounteredType";
 }
 
+/**
+ * Indicates that two endpoints have been registered with the same [HttpEndpoint] and the same URI.
+ */
 class DuplicatedURIHandler extends Error {
   String uri;
 
