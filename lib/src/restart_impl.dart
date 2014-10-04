@@ -60,7 +60,7 @@ class Restart {
    *
    * If the [port] is not provided the default value has been set to 9000.
    * 
-   * If an incoming request does not match any endpoint a 401 (bad request) status code is responded.
+   * If an incoming request does not match any endpoint a 400 (bad request) status code is responded.
    * 
    * @param [String] ip the IP exposed
    * @param [int] port the port to which restart is going to be bound
@@ -127,13 +127,13 @@ class Restart {
 
   /**
    * Internal method for handling the [HttpRequest] received.
-   * - Returns a 401 if no endpoint can be found for the requested URI.
+   * - Returns a 400 if no endpoint can be found for the requested URI.
    */
   Future<HttpResponse> _handle(HttpRequest req, Set<Endpoint> set) {
     // Let's find the endpoints matching the request
     var endpoints = set.where((e) => e.matches(req.uri.toString()));
     
-    // If no endpoints are found so let's return a 401
+    // If no endpoints are found so let's return a 400
     if (endpoints.isEmpty) {
       print("No handler for: ${req.method} ${req.uri}");
       return badRequest(req);

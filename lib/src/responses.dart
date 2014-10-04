@@ -8,7 +8,7 @@ part of restart;
 Future toFuture(obj) => new Future(() => obj);
 
 /**
- * Helper making it easy to indicate a bad request (401 status code) for developpers.
+ * Helper making it easy to indicate a bad request (400 status code) for developpers.
  */
 Future<HttpResponse> badRequest(HttpRequest req, [message = ""]) =>
     toFuture(req.response..statusCode = HttpStatus.BAD_REQUEST..write(message)..close());
