@@ -38,8 +38,27 @@ And cannot be :
 ```Dart
 anything(HttpRequest req, String bar, String id) {...}
 ```
+#### Parameter transformation aka Transformer
 
-In version 0.0.1, all the parameters are provided as strings and needs to be parsed manually. The support for dynamic parameter parsing is a task planned for next version (0.0.2). 
+Shipping with version 0.0.3, the transformers enable to get the parameter in your request directly parsed into a specific type instead of having to declare a String which would have to be parsed manually.
+
+Restart ships with the following transformers: 
+* String - this is obvious but for equality any String is going through a String transformer which is nothing but the identity function
+* int
+* num
+* bool
+* DateTime
+
+Some "basic" types might have been forgotten, so please do not hesitate to open a pull-request.
+
+It is also possible for you to register your own transformers to extend Restart abilities. To do so, it is required that your transformation function respect the Transformer typedef given below : 
+```Dart
+typedef dynamic Transformer(String val);
+```
+Then the final step is just to register the transformer for a given symbol within Restart through the registerTransformer method which takes two parameters: a Symbol and a transformation function. This would give for example : 
+```Dart
+new Restart().registerTransformer(#int, intTransformer);
+```
 
 #### Adding new HTTP method to restart
 It is now also possible to add support for non supported HTTP method with the following code : 
