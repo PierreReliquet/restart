@@ -79,8 +79,12 @@ class Endpoints {
 ```
 
 # Changelog
+## 0.0.3
+* Adding the parameter transformation through Transformers
+ 
 ## 0.0.2
 * Updating the SDK version to be compatible with the 1.6.0 project
+
 ## 0.0.1
 Basic functionnalities: 
 * Common REST verbs: GET, POST, PUT, DELETE
